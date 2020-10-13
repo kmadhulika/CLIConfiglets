@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<cli-configlets>
+	<cli-configlet>
+		<name>Interface - Configuration - Change Interface Alias</name>
+		<category>D03 Interface</category>
+		<context>/device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/interface-information/physical-interface | /device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/configuration/interfaces/interface</context>
+		<device-family>ACX/J/M/MX/T/TX/PTX/EX92xx</device-family>
+		<description>Sets one part of IF desc, according to M. Frisch.</description>
+		<execution-type>Single</execution-type>
+		<preview-show-parameters>true</preview-show-parameters>
+		<preview-show-configuration>true</preview-show-configuration>
+		<postview-show-parameters>true</postview-show-parameters>
+		<postview-show-configuration>true</postview-show-configuration>
+
+		<cli-configlet-pages>
+			<!-- At least one configlet page required -->
+			<cli-configlet-page>
+				<page-number>1</page-number>
+				<cli-text>
+##Configlet to replace parts of an interface description according to the ifdesc scheme.
+##Konfig-Template v1.01b
+##Version 2014.02.20
+##Name, Konfig-Template, Configlet version, date
+###Interface - Configuration - Change Interface Alias;v1.01b;v1.01;2014.02.20
+
+#if ( $INTERFACE ) #set ( $interface = $INTERFACE ) #end
+#if ( $CONTEXT ) #set ( $DESC = &quot;&quot; ) #set ( $DESC = $DESCContext ) #end
+#if ( !$CONTEXT.equals( &quot;None&quot; )  &amp;&amp; $interface.get(0).equals(&quot;Choose Interface&quot;) ) #terminate (&quot;Please choose an interface!&quot;) #end
+#set ( $interface = $interface.get(0) )
+#set ( $counter = 0 )
+#set ( $speed = $speedList.get(0) )
+##_______________________________________
+#if ( $change.get(0).equals( &quot;Accounting&quot; ) ) #set ( $changeId = 0 )
+#elseif ( $change.get(0).equals( &quot;Faultmgmt&quot; ) ) #set ( $changeId = 1 )
+#elseif ( $change.get(0).equals( &quot;Order&quot; ) ) #set ( $changeId = 2 )
+#elseif ( $change.get(0).equals( &quot;Provisioning&quot; ) ) #set ( $changeId = 3 )
+#elseif ( $change.get(0).equals( &quot;Leitungsbezeichnung&quot; ) ) #set ( $changeId = 4 )
+#elseif ( $change.get(0).equals( &quot;Bemerkung&quot; ) ) #set ( $changeId = 5 )
+#else ##terminate ( &quot;Error&quot; )
+#end
+#set ( $changeId = 666 ) ##just get the old way of work out of the way
+##_______________________________________
+#set ( $DESC = $DESC.get(0) )
+##if ( !$DESC.matches( &apos;^([\d\w\s\[\]\-/+:]*#){5}[\d\w\s\[\]\-/+:]*$&apos; ) )
+#if ( !$DESC.matches( &apos;^(#[\d\w\s\[\]\.\-/+:]*){5}$&apos; ) )
+#terminate ( &quot;Beschreibung von Interface $interface passt nicht vom Format her: &gt;$DESC&lt;. &lt;br /&gt;Erlaubte Zeichen sind: [a-zA-Z0-9[].-/+:]&quot; )
+#end
+#set ( $newPart = $newPart.replaceAll( &quot;#&quot;, &quot;&quot; ) )
+#set ( $DESC = $DESC.replaceAll( &quot;#&quot;, &quot;#/-/-/&quot; ) )
+#set ( $oldDescArr = $DESC.split( &quot;#&quot; ) )
+#set ( $DESC = &quot;&quot; )
+#foreach ( $iterator in $oldDescArr )
+#set ( $DESC = &quot;${DESC}#&quot; )
+#if ( $counter == $changeId )
+#set ( $DESC = &quot;${DESC}$newPart&quot; )
+#elseif ( $counter == 3 &amp;&amp; !$speed.isEmpty() )  ##speed
+#set ( $iterator = $iterator.replaceAll( &quot;/-/-/&quot;, &quot;&quot; ) )
+		##set ( $iterator = $iterator.substring( $iterator.indexOf( &quot;_&quot; ) ).substring( 1 ) )
+#if ( $iterator.contains( &quot;_&quot; ) )
+#set ( $iterator = $iterator.substring( $iterator.indexOf( &quot;_&quot; ) ).substring( 0 ) )
+#else
+#set ( $iterator = &quot;&quot; )    ##when only speed, no need for iterator..
+#end
+#set ( $speed = $speed.replaceAll( &quot;#&quot;, &quot;&quot; ) )
+		##set ( $DESC = &quot;${DESC}${speed}_${iterator}&quot; )
+#set ( $DESC = &quot;${DESC}${speed}${iterator}&quot; )
+#elseif ( $counter == 4 &amp;&amp; !$lbz.isEmpty() )  ##LBZ
+#set ( $iterator = $iterator.replaceAll( &quot;/-/-/&quot;, &quot;&quot; ) )
+#set ( $lbz = $lbz.replaceAll( &quot;#&quot;, &quot;&quot; ) )
+#set ( $DESC = &quot;${DESC}${lbz}&quot; )
+#elseif ( $counter == 5 &amp;&amp; !$note.isEmpty() )  ##Bemerkung
+#set ( $note = $note.replaceAll( &quot;#&quot;, &quot;&quot; ) )
+#set ( $DESC = &quot;${DESC}${note}&quot; )
+#else
+#set ( $iterator = $iterator.replaceAll( &quot;/-/-/&quot;, &quot;&quot; ) )
+#set ( $DESC = &quot;${DESC}${iterator}&quot; )
+#end
+#set ( $counter = $counter + 1 )
+#end
+#set ( $DESC = $DESC.substring(1) )
+##set ( $DESC = &quot;${DESC_ACCOUNTING}#${DESC_FAULTMGMT}#${DESC_ORDER}#${DESC_PROVISIONING}#${LEITUNGSBEZEICHNUNG}#${BEMERKUNG}&quot; )
+
+interfaces {
+	$interface {
+		description &quot;$DESC&quot;;
+	}
+}
+
+##context: /device/interface-information/physical-interface | /device/configuration/interfaces/interface
+##.*\..*\..*  :  DEU.DTAG.BNG4P100
+##/device/configuration/interfaces/interface[name=&apos;$interface.get(0)&apos;]/description/text()
+				</cli-text>
+			</cli-configlet-page>
+		</cli-configlet-pages>
+
+		<cli-configlet-params>
+			<cli-configlet-param>
+				<parameter>interface</parameter>
+				<display-name>Interface</display-name>
+				<parameter-type>Selection Field</parameter-type>
+				<description/>
+				<configured-value-xpath/>
+				<default-value>Choose Interface</default-value>
+				<selection-values-xpath>distinct-values( /device/interface-information/physical-interface[starts-with(name, &quot;ge-&quot;) or starts-with(name, &quot;xe-&quot;)]/name/text()|/device/configuration/interfaces/interface[starts-with(name, &quot;ge-&quot;) or starts-with(name, &quot;xe-&quot;)]/name/text() )</selection-values-xpath>
+				<selection-values/>
+				<parameter-order>1</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>speed</parameter>
+				<display-name>Speed</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description>Speed, either 1G or 10G.</description>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>2</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>speedList</parameter>
+				<display-name>speedList</display-name>
+				<parameter-type>Selection Field</parameter-type>
+				<description/>
+				<configured-value-xpath/>
+				<default-value/>
+				<selection-values-xpath/>
+				<selection-values>,1G,10G</selection-values>
+				<parameter-order>2</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>lbz</parameter>
+				<display-name>Leitungsbezeichnung</display-name>
+				<parameter-type>Text Field</parameter-type>
+				<description/>
+				<regex-value/>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>3</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>note</parameter>
+				<display-name>Bemerkung</display-name>
+				<parameter-type>Text Field</parameter-type>
+				<description/>
+				<regex-value/>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>4</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>DESCContext</parameter>
+				<display-name>DESCContext</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<configured-value-xpath>/device/configuration/interfaces/interface[name=&quot;$INTERFACE.get(0)&quot;]/description/text()</configured-value-xpath>
+				<default-value/>
+				<parameter-order>17</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>DESC</parameter>
+				<display-name>DESC</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<configured-value-xpath>/device/configuration/interfaces/interface[name=&quot;$interface.get(0)&quot;]/description/text()</configured-value-xpath>
+				<default-value/>
+				<parameter-order>17</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>changeId</parameter>
+				<display-name>changeId</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>19</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>oldDescArr</parameter>
+				<display-name>oldDescArr</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>19</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>change</parameter>
+				<display-name>ersetzender Teil</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description>Name des Beschreibungsteils, der geaendert werden soll.</description>
+				<configured-value-xpath/>
+				<default-value>Accounting,Faultmgmt,Order,Provisioning,Leitungsbezeichnung,Bemerkung</default-value>
+				<parameter-order>22</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>newPart</parameter>
+				<display-name>Neuer Text</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<configured-value-xpath/>
+				<default-value>new</default-value>
+				<parameter-order>33</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>iterator</parameter>
+				<display-name>iterator</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>42</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>counter</parameter>
+				<display-name>counter</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>42</parameter-order>
+			</cli-configlet-param>
+
+		</cli-configlet-params>
+
+	</cli-configlet>
+</cli-configlets>

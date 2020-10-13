@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<cli-configlets>
+	<cli-configlet>
+		<name>Interface - Configuration - Set Description</name>
+		<category>D03 Interface</category>
+		<context>/device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/interface-information/physical-interface | /device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/configuration/interfaces/interface</context>
+		<device-family>ACX/J/M/MX/T/TX/PTX/EX92xx</device-family>
+		<description>Change desc of PI to user input</description>
+		<execution-type>Single</execution-type>
+		<preview-show-parameters>true</preview-show-parameters>
+		<preview-show-configuration>true</preview-show-configuration>
+		<postview-show-parameters>true</postview-show-parameters>
+		<postview-show-configuration>true</postview-show-configuration>
+
+		<cli-configlet-pages>
+			<!-- At least one configlet page required -->
+			<cli-configlet-page>
+				<page-number>1</page-number>
+				<cli-text>
+#if ( $INTERFACE )
+#set ( $interface = $INTERFACE )
+#end
+#set ( $interface = $interface.get(0) )
+
+interfaces {
+	$interface {
+		description &quot;$Desc&quot;;
+	}
+}
+				</cli-text>
+			</cli-configlet-page>
+		</cli-configlet-pages>
+
+		<cli-configlet-params>
+			<cli-configlet-param>
+				<parameter>interface</parameter>
+				<display-name>interface</display-name>
+				<parameter-type>Selection Field</parameter-type>
+				<description/>
+				<configured-value-xpath/>
+				<default-value>Choose an interface when not using context.</default-value>
+				<selection-values-xpath>distinct-values( /device/interface-information/physical-interface[starts-with(name, &quot;ge-&quot;) or starts-with(name, &quot;xe-&quot;)]/name/text()|/device/configuration/interfaces/interface[starts-with(name, &quot;ge-&quot;) or starts-with(name, &quot;xe-&quot;)]/name/text() )</selection-values-xpath>
+				<selection-values/>
+				<parameter-order>1</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>Desc</parameter>
+				<display-name>Desc</display-name>
+				<parameter-type>Text Field</parameter-type>
+				<description/>
+				<regex-value/>
+				<configured-value-xpath/>
+				<default-value>Your description here.</default-value>
+				<parameter-order>2</parameter-order>
+			</cli-configlet-param>
+
+		</cli-configlet-params>
+
+	</cli-configlet>
+</cli-configlets>

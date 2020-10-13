@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<cli-configlets>
+
+	<cli-configlet>
+		<name>Interface - Configuration - Change Description To Un_Managed</name>
+		<category>D03 Interface</category>
+		<context>/device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/interface-information/physical-interface | /device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/configuration/interfaces/interface</context>
+		<device-family>ACX/J/M/MX/T/TX/PTX/EX92xx</device-family>
+		<description>Configlet to change the documented status of an interface and its units to (un)managed, via description.</description>
+		<execution-type>Single</execution-type>
+		<preview-show-parameters>true</preview-show-parameters>
+		<preview-show-configuration>true</preview-show-configuration>
+		<postview-show-parameters>true</postview-show-parameters>
+		<postview-show-configuration>true</postview-show-configuration>
+
+		<cli-configlet-pages>
+			<!-- At least one configlet page required -->
+			<cli-configlet-page>
+				<page-number>1</page-number>
+				<cli-text>
+##Configlet to change the documented status of an interface and its unit to (un)managed, via description.
+##Konfig-Template v25c
+##Version 2015.11.11
+##Name, Konfig-Template, Configlet version, date
+###Interface - Configuration - Change Description To Un_Managed;v25c;v1.2;2015.11.11
+##	Changelog:
+##	----------
+##	1.0, 13.06.2014
+##		- First version.
+##	1.1, 15.09.2015
+##		- Updated a bit.
+##	1.2, 04.11.2015
+##		Changes by abartsch:
+##		- Updated to v25c.
+##		- Revamped unit specification (CSV list instead of selection).
+##	     11.11.2015
+##		Changes by abartsch:
+##		- Added #terminte if specified unit is not configured.
+##		- Added #terminte if unit description does not match expected string.
+##		- Changed unit numbers of MGMT
+##		- Added unit numbers for POTS (100) and IQ (200)
+##	_________________________________________________________________________
+##
+#set ( $newStatus = $newStatus.get(0) )
+#if ( $newStatus == &quot;Managed&quot; )
+#set ( $newStatus = &quot;m&quot; )
+#else
+#set ( $newStatus = &quot;u&quot; )
+#end
+#set ( $units = $units.get(0) )
+#set ( $INTERFACE = $INTERFACE.get(0) )
+#set ( $descInterface = $descInterface.get(0) )
+#if ( !$descInterface.matches( &quot;^.*#[mu]#.*$&quot;) )
+#terminate( &quot;'The interface description is not in the correct format.'&quot; )
+#end
+##
+## construct $unitDescriptionMap containing key:value pairs
+##   unit/name : unit/description
+## which originate from the device configuration
+## (where unit/name is a number)
+#set ( $unitDescriptionMap = {} )
+#foreach ($iterator in $unitDescriptions)
+#set ( $iterator = $iterator.split( &quot; &quot;, 2 ) )
+#if ( $iterator.size() &gt; 1 )
+#set ( $unitDescriptionMap[$iterator[0]] = $iterator[1] )
+#end
+#end
+##$unitDescriptionMap
+##
+## define unitMap, which contains the known symbolic unit names
+## mapped to unit numbers (= unit/name from device configuration)
+#set ( $unitMap = {
+	&quot;ANCP16&quot; : [ &quot;16&quot; ],
+	&quot;ANCP17&quot; : [ &quot;17&quot; ],
+	&quot;ANCP18&quot; : [ &quot;18&quot; ],
+	&quot;ANCP19&quot; : [ &quot;19&quot; ],
+	&quot;IQ&quot; : [ &quot;200&quot; ],
+	&quot;MGMT&quot; : [ &quot;5&quot;, &quot;25&quot; ],
+	&quot;POTS&quot; : [ &quot;100&quot; ] 
+} )
+##$unitMap
+##
+#set ( $unitList = [] )
+#if ( !$units.equalsIgnoreCase( &quot;empty&quot; ) &amp;&amp; !$units.isEmpty())
+#foreach ( $iterator in $units.split( &quot;[;,]\s*&quot; ) )
+#if ( $unitMap.containsKey($iterator) )
+#set ( $null = $unitList.addAll($unitMap[$iterator]) )
+#elseif ( $iterator.matches(&quot;^\d+&quot;) )
+#set ( $null = $unitList.add($iterator) )
+#else
+#terminate( &quot;'Unsupported unit name $iterator in unit list. Please change!'&quot; )
+#end##-end: if $iterator is in UnitMap or a number
+#end##-end: $iterator $units
+#end##-end: if $units not empty
+##TODO: make unitList a list of unique values (?)
+##$unitList
+##
+#set ( $descInterface = $descInterface.replaceAll( &quot;^(.*)#[mu]#(.*)$&quot;, &quot;$1#$newStatus#$2&quot; ) )
+##
+interfaces {
+	$INTERFACE {
+		description &quot;$descInterface&quot;;
+#foreach ( $iterator in $unitList )
+#if ( $unitDescriptionMap.containsKey($iterator) )
+#set ( $descUnit = $unitDescriptionMap[$iterator] )
+#set ( $descUnit = $descUnit.replaceAll( &quot;^(.*)#[mu]#(.*)$&quot;, &quot;$1#$newStatus#$2&quot; ) )
+#if ( $descUnit.matches( &quot;^.*#[mu]#.*$&quot;) )
+		unit $iterator {
+			description &quot;$descUnit&quot;;
+		}
+#else
+#terminate ( &quot;'The description of unit $iterator is not in the correct format.'&quot; )
+#end
+#else
+##terminate ( &quot;'Unit $iterator is not configured.'&quot; )
+#end##-end: if $iterator is in $unitDescriptionMap
+#end##-end: $iterator $unitList
+	}
+}
+				</cli-text>
+			</cli-configlet-page>
+		</cli-configlet-pages>
+
+		<cli-configlet-params>
+			<cli-configlet-param>
+				<parameter>newStatus</parameter>
+				<display-name>New Status</display-name>
+				<parameter-type>Selection Field</parameter-type>
+				<description>New status to set, "Managed" or "Unmanaged".</description>
+				<configured-value-xpath/>
+				<default-value/>
+				<selection-values-xpath/>
+				<selection-values>Managed,Unmanaged</selection-values>
+				<parameter-order>1</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>units</parameter>
+				<display-name>List of Units</display-name>
+				<parameter-type>Text Field</parameter-type>
+				<description>Units to set. CSV list of (known) symbolic unit names or unit numbers</description>
+				<configured-value-xpath/>
+				<default-value>empty</default-value>
+				<parameter-order>2</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>unitDescriptions</parameter>
+				<display-name>unitDescriptions</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<configured-value-xpath>/device/configuration/interfaces/interface[name="$INTERFACE.get(0)" or name="$INTERFACE"]/unit/concat(name/text(),' ',description/text())</configured-value-xpath>
+				<default-value/>
+				<parameter-order>666</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>unitDescriptionMap</parameter>
+				<display-name>unitDescriptionMap</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>666</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>descInterface</parameter>
+				<display-name>descInterface</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<configured-value-xpath>/device/configuration/interfaces/interface[name="$INTERFACE.get(0)" or name="$INTERFACE"]/description/text()</configured-value-xpath>
+				<default-value/>
+				<parameter-order>666</parameter-order>
+			</cli-configlet-param>
+
+      <cli-configlet-param>
+        <parameter>unitMap</parameter>
+        <display-name>unitMap</display-name>
+        <parameter-type>Invisible Field</parameter-type>
+        <description></description>
+        <configured-value-xpath/>
+        <default-value/>
+        <parameter-order>666</parameter-order>
+      </cli-configlet-param>
+
+      <cli-configlet-param>
+        <parameter>unitList</parameter>
+        <display-name>unitList</display-name>
+        <parameter-type>Invisible Field</parameter-type>
+        <description></description>
+        <configured-value-xpath/>
+        <default-value/>
+        <parameter-order>666</parameter-order>
+      </cli-configlet-param>
+
+      <cli-configlet-param>
+        <parameter>descUnit</parameter>
+        <display-name>descUnit</display-name>
+        <parameter-type>Invisible Field</parameter-type>
+        <description></description>
+        <configured-value-xpath/>
+        <default-value/>
+        <parameter-order>666</parameter-order>
+      </cli-configlet-param>
+
+      <cli-configlet-param>
+        <parameter>iterator</parameter>
+        <display-name>iterator</display-name>
+        <parameter-type>Invisible Field</parameter-type>
+        <description></description>
+        <configured-value-xpath/>
+        <default-value/>
+        <parameter-order>666</parameter-order>
+      </cli-configlet-param>
+
+		</cli-configlet-params>
+
+	</cli-configlet>
+</cli-configlets>

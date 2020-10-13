@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<cli-configlets>
+	<cli-configlet>
+		<name>Interface - Configuration - Set Gigether Loopback</name>
+		<category>D03 Interface</category>
+		<context>/device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/interface-information/physical-interface | /device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/configuration/interfaces/interface</context>
+		<device-family>ACX/J/M/MX/T/TX/PTX/EX92xx</device-family>
+		<description>Sets the gigether-option &quot;loopback&quot; for interfaces.</description>
+		<execution-type>Grouped</execution-type>
+		<preview-show-parameters>true</preview-show-parameters>
+		<preview-show-configuration>true</preview-show-configuration>
+		<postview-show-parameters>true</postview-show-parameters>
+		<postview-show-configuration>true</postview-show-configuration>
+
+		<cli-configlet-pages>
+			<!-- At least one configlet page required -->
+			<cli-configlet-page>
+				<page-number>1</page-number>
+				<cli-text>
+#if ( !$CONTEXT )
+#set ( $INTERFACE = $INTERFACE.split(&quot;;&quot;) )
+#end
+interfaces {
+#foreach ( $INTF in $INTERFACE )
+	$INTF {
+		gigether-options {
+			loopback;
+		}
+	}
+#end
+}
+				</cli-text>
+			</cli-configlet-page>
+		</cli-configlet-pages>
+
+		<cli-configlet-params>
+			<cli-configlet-param>
+				<parameter>INTF</parameter>
+				<display-name>INTF</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<parameter-scope>Global</parameter-scope>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>1</parameter-order>
+			</cli-configlet-param>
+
+		</cli-configlet-params>
+
+	</cli-configlet>
+</cli-configlets>

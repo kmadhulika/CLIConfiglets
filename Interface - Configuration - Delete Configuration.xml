@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<cli-configlets>
+	<cli-configlet>
+		<name>Interface - Configuration - Delete Configuration</name>
+		<category>D03 Interface</category>
+		<context>/device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/interface-information/physical-interface | /device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/configuration/interfaces/interface</context>
+		<device-family>ACX/J/M/MX/T/TX/PTX/EX92xx</device-family>
+		<description>Delete physical interface</description>
+		<execution-type>Grouped</execution-type>
+		<preview-show-parameters>true</preview-show-parameters>
+		<preview-show-configuration>true</preview-show-configuration>
+		<postview-show-parameters>true</postview-show-parameters>
+		<postview-show-configuration>true</postview-show-configuration>
+
+		<cli-configlet-pages>
+			<!-- At least one configlet page required -->
+			<cli-configlet-page>
+				<page-number>1</page-number>
+				<cli-text>
+##Deletes the configuration of some interfaces.
+##Konfig-Template v25b
+##Version 2015.09.09
+##Name, Konfig-Template, Configlet version, date
+###Interface - Configuration - Delete Configuration;v25b;v1.1;2015.09.08
+##	Changelog:
+##	----------
+##	1.1, 08.09.2015
+##		- Updated.
+##	_________________________________________________________________________
+
+#if ( !$CONTEXT )
+#set ( $INTERFACE = $INTERFACE.split("[;,]\s+?") )
+#end
+interfaces {
+#foreach ( $INTF in $INTERFACE )
+	delete: $INTF;
+#end
+}
+
+#foreach ( $INTF in $INTERFACE )
+delete: groups esmc-interfaces chassis synchronization esmc-transmit interfaces $INTF;
+#end
+				</cli-text>
+			</cli-configlet-page>
+		</cli-configlet-pages>
+
+		<cli-configlet-params>
+			<cli-configlet-param>
+				<parameter>INTF</parameter>
+				<display-name>INTF</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<parameter-scope>Global</parameter-scope>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>1</parameter-order>
+			</cli-configlet-param>
+
+		</cli-configlet-params>
+
+	</cli-configlet>
+</cli-configlets>

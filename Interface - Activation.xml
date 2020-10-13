@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<cli-configlets>
+	<cli-configlet>
+		<name>Interface - Activation</name>
+		<category>D03 Interface</category>
+		<context>/device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/interface-information/physical-interface[starts-with(name, &quot;ge-&quot;) or starts-with(name, &quot;xe-&quot;)] | /device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/configuration/interfaces/interface[starts-with(name, &quot;ge-&quot;) or starts-with(name, &quot;xe-&quot;)]</context>
+		<device-family>ACX/J/M/MX/T/TX/PTX/EX92xx</device-family>
+		<description>Delete &quot;disable&quot; from interface</description>
+		<execution-type>Grouped</execution-type>
+		<preview-show-parameters>true</preview-show-parameters>
+		<preview-show-configuration>true</preview-show-configuration>
+		<postview-show-parameters>true</postview-show-parameters>
+		<postview-show-configuration>true</postview-show-configuration>
+
+		<cli-configlet-pages>
+			<!-- At least one configlet page required -->
+			<cli-configlet-page>
+				<page-number>1</page-number>
+				<cli-text>
+##Activates one or multiple interfaces. Actually similar to &quot;Interface - Activation GUI&quot;, but for Netcracker..
+##Konfig-Template v1.01b
+##Version 2014.02.13
+##Name, Konfig-Template, Configlet version, date
+###Interface - Activation;v1.01b;v1.0;2014.02.13
+
+#if ( !$CONTEXT )
+#set ( $INTERFACE = $INTERFACE.split(&quot;;&quot;) )
+#end
+#if ( $interface )
+#set ( $INTERFACE = [$interface] )
+#end
+interfaces {
+#foreach ( $INTF in $INTERFACE )
+	$INTF {
+		enable;
+	}
+#end
+}
+				</cli-text>
+			</cli-configlet-page>
+		</cli-configlet-pages>
+
+		<cli-configlet-params>
+			<cli-configlet-param>
+				<parameter>interface</parameter>
+				<display-name>interface</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description>Netcracker..</description>
+				<parameter-scope>Global</parameter-scope>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>1</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>INTF</parameter>
+				<display-name>INTF</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<parameter-scope>Global</parameter-scope>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>1</parameter-order>
+			</cli-configlet-param>
+
+		</cli-configlet-params>
+
+	</cli-configlet>
+</cli-configlets>

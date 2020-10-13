@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<cli-configlets>
+	<cli-configlet>
+		<name>Interface - Configuration - Set Interface Alias</name>
+		<category>D03 Interface</category>
+		<context>/device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')] | /device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/interface-information/physical-interface[starts-with(name, &quot;ge-&quot;) or starts-with(name, &quot;xe-&quot;)] | /device[matches(name, '\w{3}J\d{2,3}') or matches(name, '^(bng|BNG).*$')]/configuration/interfaces/interface[starts-with(name, &quot;ge-&quot;) or starts-with(name, &quot;xe-&quot;)]</context>
+		<device-family>ACX/J/M/MX/T/TX/PTX/EX92xx</device-family>
+		<description>Sets interface alias according to M. Frisch, 18.04.2013.
+Beschreibung besteht aus 6 Werten, getrennt durch Rauten (#). </description>
+		<execution-type>Single</execution-type>
+		<preview-show-parameters>true</preview-show-parameters>
+		<preview-show-configuration>true</preview-show-configuration>
+		<postview-show-parameters>true</postview-show-parameters>
+		<postview-show-configuration>true</postview-show-configuration>
+
+		<cli-configlet-pages>
+			<!-- At least one configlet page required -->
+			<cli-configlet-page>
+				<page-number>1</page-number>
+				<cli-text>
+##Sets the interface description according to the IFdesc format.
+##Konfig-Template v1.01b
+##Version 2014.02.13
+##Name, Konfig-Template, Configlet version, date
+###Interface - Configuration - Set Interface Alias;v1.01b;v1.0;2014.02.13
+
+##Format: #m#gf_direkt_RD#&lt;speed&gt;_&lt;line-id&gt;#&lt;lbz&gt;#&lt;note&gt;
+#if ( $INTERFACE ) #set ( $interface = $INTERFACE ) #end
+#set ( $DESC = &quot;#m#gf_direkt_RD#$speedList.get(0)_${lineId}#${lbz}#${note}&quot; )
+#set ( $interface = $interface.get(0) )
+
+##Makes: #m#gf_direkt_RD#1G_&lt;line-id&gt;#-#&lt;note&gt;
+
+interfaces {
+	$interface {
+		description &quot;$DESC&quot;;
+	}
+}
+
+##context: /device/interface-information/physical-interface | /device/configuration/interfaces/interface | /device/configuration/interfaces/interface/unit
+##.*\..*\..*  :  DEU.DTAG.BNG4P100
+##/device/configuration/interfaces/interface[name=&apos;$interface.get(0)&apos;]/description/text()
+##unit:   /device/configuration/interfaces/interface[name=&apos;$interface.get(0)&apos;]/unit/name/text()
+
+				</cli-text>
+			</cli-configlet-page>
+		</cli-configlet-pages>
+
+		<cli-configlet-params>
+			<cli-configlet-param>
+				<parameter>interface</parameter>
+				<display-name>Interface</display-name>
+				<parameter-type>Selection Field</parameter-type>
+				<description/>
+				<configured-value-xpath/>
+				<default-value>Choose an interface when not using context.</default-value>
+				<selection-values-xpath>distinct-values( /device/interface-information/physical-interface[starts-with(name, &quot;ge-&quot;) or starts-with(name, &quot;xe-&quot;)]/name/text()|/device/configuration/interfaces/interface[starts-with(name, &quot;ge-&quot;) or starts-with(name, &quot;xe-&quot;)]/name/text() )</selection-values-xpath>
+				<selection-values/>
+				<parameter-order>1</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>speedList</parameter>
+				<display-name>Geschwindigkeitsauswahl</display-name>
+				<parameter-type>Selection Field</parameter-type>
+				<description>Connection speed of IF.</description>
+				<configured-value-xpath/>
+				<default-value/>
+				<selection-values-xpath/>
+				<selection-values>,1G,10G</selection-values>
+				<parameter-order>2</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>lineId</parameter>
+				<display-name>LineId</display-name>
+				<parameter-type>Text Field</parameter-type>
+				<description>LineId, die als Bescheibung fuer logisches Interface genutzt wird. Wenn gefuellt, ersetzt es alle anderen Beschreibungsteile. Muss korrektes Format haben (z.B. DEU.DTAG.BNG4P100).</description>
+				<regex-value>^[\d\w\s\[\]\.\-/+:]*$</regex-value>
+				<configured-value-xpath/>
+				<default-value>DEU.DTAG.BNG4P100</default-value>
+				<parameter-order>3</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>lbz</parameter>
+				<display-name>Leitungsbezeichnung</display-name>
+				<parameter-type>Text Field</parameter-type>
+				<description/>
+				<regex-value>^[\d\w\s\[\]\.\-/+:]*$</regex-value>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>8</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>note</parameter>
+				<display-name>Bemerkung</display-name>
+				<parameter-type>Text Field</parameter-type>
+				<description/>
+				<regex-value>^[\d\w\s\[\]\.\-/+:]*$</regex-value>
+				<configured-value-xpath/>
+				<default-value>aggregated Ethernet zdcn-dhcp [ge-0/0/9 + ge-1/0/9]</default-value>
+				<parameter-order>9</parameter-order>
+			</cli-configlet-param>
+
+			<cli-configlet-param>
+				<parameter>DESC</parameter>
+				<display-name>DESC</display-name>
+				<parameter-type>Invisible Field</parameter-type>
+				<description/>
+				<configured-value-xpath/>
+				<default-value/>
+				<parameter-order>666</parameter-order>
+			</cli-configlet-param>
+
+		</cli-configlet-params>
+
+	</cli-configlet>
+</cli-configlets>
